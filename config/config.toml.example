@@ -1,0 +1,23 @@
+# Hari Configuration Example
+# Copy this to ~/.hari/config.toml and customize
+
+[pomodoro]
+duration_minutes = 25
+short_break_minutes = 5
+long_break_minutes = 15
+auto_start_breaks = false
+
+[telegram]
+enabled = false
+token = "YOUR_TELEGRAM_BOT_TOKEN"
+chat_id = "YOUR_CHAT_ID"
+
+[usage_monitor]
+sample_interval_seconds = 5
+threshold_minutes = 120
+blacklist_apps = ["Twitter", "Reddit", "Facebook", "YouTube"]
+
+[llm]
+enabled = false
+model_name = "llama2"
+endpoint = "http://localhost:11434/api/generate"

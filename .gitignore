@@ -1,0 +1,15 @@
+*.o
+*.so
+*.a
+harid
+hari
+.hari/
+*.log
+*.json
+/tmp/hari.sock
+*.swp
+*.swo
+*~
+.vscode/
+.idea/
+compile_commands.json
