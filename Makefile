@@ -1,10 +1,11 @@
 CC = gcc
 CFLAGS = -Wall -Wextra -std=c11 -I./include -g
-LDFLAGS = -lpthread
+LDFLAGS = -lpthread -ljson-c
 
 DAEMON_SOURCES = daemon/main.c \
                  daemon/event_loop.c \
                  daemon/module_registry.c \
+                 daemon/command_handler.c \
                  daemon/storage/storage.c \
                  daemon/storage/storage_local.c \
                  daemon/storage/storage_sync.c \

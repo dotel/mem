@@ -15,7 +15,7 @@
 #include "../include/hari_ipc.h"
 
 static volatile bool g_running = true;
-static hari_state_t g_state = {0};
+hari_state_t g_state = {0};
 
 void signal_handler(int signum) {
     LOG_INFO("main", "Received signal %d, shutting down...", signum);
@@ -54,6 +54,9 @@ extern hari_module_t* telegram_module_create(void);
 extern hari_module_t* llm_adapter_module_create(void);
 
 int main(int argc, char* argv[]) {
+    (void)argc;
+    (void)argv;
+    
     log_init(LOG_INFO);
     LOG_INFO("main", "Hari daemon v%s starting...", HARI_VERSION);
     
@@ -62,7 +65,7 @@ int main(int argc, char* argv[]) {
     }
     
     char config_file[256];
-    snprintf(config_file, sizeof(config_file), "%s/%s/config.toml", 
+    snprintf(config_file, sizeof(config_file), "%s/%s/config.json", 
              getenv("HOME"), HARI_CONFIG_DIR);
     
     if (config_init(config_file) != 0) {

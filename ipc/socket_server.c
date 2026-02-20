@@ -8,6 +8,7 @@
 #include <errno.h>
 #include "../include/hari_ipc.h"
 #include "../include/hari_log.h"
+#include "../include/hari_command.h"
 
 static int g_server_fd = -1;
 static char g_socket_path[256] = {0};
@@ -64,10 +65,27 @@ int ipc_server_poll(void) {
     
     if (bytes_read > 0) {
         buffer[bytes_read] = '\0';
-        LOG_INFO("ipc_server", "Received message: %s", buffer);
+        LOG_DEBUG("ipc_server", "Received message: %s", buffer);
         
-        const char* response = "{\"version\": 1, \"status\": \"ok\", \"message\": \"Command received\"}";
-        write(client_fd, response, strlen(response));
+        ipc_request_t request = {0};
+        ipc_response_t response = {0};
+        
+        if (ipc_parse_request(buffer, &request) == 0) {
+            LOG_INFO("ipc_server", "Processing command: %s %s", request.type, request.payload);
+            command_dispatch(&request, &response);
+        } else {
+            response.version = IPC_PROTOCOL_VERSION;
+            strncpy(response.status, "error", sizeof(response.status) - 1);
+            strncpy(response.message, "Failed to parse request", sizeof(response.message) - 1);
+        }
+        
+        char response_buffer[IPC_MAX_MESSAGE_SIZE];
+        if (ipc_serialize_response(&response, response_buffer, sizeof(response_buffer)) == 0) {
+            write(client_fd, response_buffer, strlen(response_buffer));
+        } else {
+            const char* error_response = "{\"version\": 1, \"status\": \"error\", \"message\": \"Failed to serialize response\"}";
+            write(client_fd, error_response, strlen(error_response));
+        }
     }
     
     close(client_fd);
