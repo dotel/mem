@@ -100,13 +100,31 @@ Start the daemon:
 ./harid
 ```
 
-Use the CLI:
+### Using Hari (Natural Language Interface)
+
+The primary way to interact with Hari is through natural language commands:
+
 ```bash
-./hari ping                  # Check daemon status
-./hari pomodoro start        # Start a Pomodoro session
-./hari pomodoro stop         # Stop current session
-./hari status                # Get daemon status
+./hari start a timer for 30 minutes
+./hari pause my pomodoro
+./hari stop the timer
+./hari what's the status
 ```
+
+The `hari` command accepts any natural language input and routes it through the LLM daemon for parsing.
+
+### Using hari-debug (Internal Testing)
+
+For testing core daemon features directly (bypasses LLM):
+
+```bash
+./hari-debug ping                  # Check daemon status
+./hari-debug pomodoro start        # Start a Pomodoro session
+./hari-debug pomodoro stop         # Stop current session
+./hari-debug status                # Get daemon status
+```
+
+The `hari-debug` tool sends structured commands directly to the C daemon and is primarily used for development and debugging.
 
 ## State Storage
 

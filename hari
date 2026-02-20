@@ -1,0 +1,8 @@
+#!/bin/bash
+# Hari - Natural Language Productivity Assistant
+# Primary user interface that routes commands to the LLM daemon
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+# Combine all arguments into a single command string
+python3 "$SCRIPT_DIR/llm/hari_llm_cli.py" "$*"

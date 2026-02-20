@@ -40,23 +40,31 @@ python3 llm/hari_llm_daemon.py
 
 ### Send Natural Language Commands
 
+The easiest way is using the `hari` wrapper script:
+
 ```bash
 # Start a timer
-python3 llm/hari_llm_cli.py "start a timer"
-python3 llm/hari_llm_cli.py "begin a focus session"
-python3 llm/hari_llm_cli.py "start working"
+./hari start a timer
+./hari begin a focus session for 30 minutes
+./hari start working
 
 # Pause
-python3 llm/hari_llm_cli.py "pause my pomodoro"
-python3 llm/hari_llm_cli.py "hold the timer"
+./hari pause my pomodoro
+./hari hold the timer
 
 # Stop
-python3 llm/hari_llm_cli.py "stop the timer"
-python3 llm/hari_llm_cli.py "cancel my session"
+./hari stop the timer
+./hari cancel my session
 
 # Status
-python3 llm/hari_llm_cli.py "what's the status"
-python3 llm/hari_llm_cli.py "how are things"
+./hari what's the status
+./hari how are things
+```
+
+Alternatively, you can call the Python CLI directly:
+
+```bash
+python3 llm/hari_llm_cli.py "start a timer"
 ```
 
 ## Supported Commands
@@ -127,14 +135,21 @@ Benefits:
 
 ```bash
 # All should return JSON responses
-python3 llm/hari_llm_cli.py "start a timer"
+./hari start a timer
 # {"version": 1, "status": "ok", "message": "Pomodoro started"}
 
-python3 llm/hari_llm_cli.py "pause"
+./hari pause
 # {"version": 1, "status": "ok", "message": "Pomodoro paused"}
 
-python3 llm/hari_llm_cli.py "what's up"
+./hari what's up
 # {"version": 1, "status": "ok", "message": "Uptime: X ms, Modules: 4"}
+```
+
+For debugging the C daemon directly (bypassing LLM):
+
+```bash
+./hari-debug pomodoro start
+./hari-debug status
 ```
 
 ## Development

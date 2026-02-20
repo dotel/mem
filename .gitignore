@@ -2,11 +2,12 @@
 *.so
 *.a
 harid
-hari
+hari-debug
 .hari/
 *.log
 *.json
 /tmp/hari.sock
+/tmp/hari_llm.sock
 *.swp
 *.swo
 *~

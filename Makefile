@@ -25,7 +25,7 @@ DAEMON_OBJECTS = $(DAEMON_SOURCES:.c=.o)
 CLI_OBJECTS = $(CLI_SOURCES:.c=.o)
 
 DAEMON_TARGET = harid
-CLI_TARGET = hari
+CLI_TARGET = hari-debug
 
 .PHONY: all clean install
 
@@ -42,7 +42,7 @@ $(CLI_TARGET): $(CLI_OBJECTS)
 
 clean:
 	rm -f $(DAEMON_OBJECTS) $(CLI_OBJECTS) $(DAEMON_TARGET) $(CLI_TARGET)
-	rm -f /tmp/hari.sock
+	rm -f /tmp/hari.sock /tmp/hari_llm.sock
 
 install: $(DAEMON_TARGET) $(CLI_TARGET)
 	install -m 755 $(DAEMON_TARGET) /usr/local/bin/
