@@ -1,0 +1,17 @@
+# Hari Python services
+requests>=2.28.0
+
+# Web API (for frontend / integrations)
+fastapi>=0.100.0
+uvicorn[standard]>=0.22.0
+
+# Auth (login, JWT)
+pyjwt>=2.8.0
+bcrypt>=4.0.0
+
+# Optional: AWS Bedrock (for cloud/paid tier)
+# boto3>=1.28.0
+
+# RAG / memory (semantic search over past notes)
+sentence-transformers>=2.2.0
+numpy>=1.24.0

@@ -1,8 +1,8 @@
 *.o
 *.so
 *.a
-harid
-hari-debug
+__pycache__/
+*.pyc
 .hari/
 *.log
 *.json

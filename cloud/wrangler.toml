@@ -1,0 +1,29 @@
+# Cloudflare Workers Configuration
+# Deploy with: wrangler deploy
+
+name = "hari-cloud"
+main = "worker.js"
+compatibility_date = "2024-01-01"
+
+# Cron trigger - runs every hour to check for nudges
+[triggers]
+crons = ["0 * * * *"]
+
+# D1 Database binding
+[[d1_databases]]
+binding = "DB"
+database_name = "hari-users"
+database_id = "YOUR_DATABASE_ID_HERE"  # Get this after creating DB
+
+# Environment variables (secrets)
+# Set with: wrangler secret put BOT_TOKEN
+[vars]
+# BOT_TOKEN is set as a secret, not here
+
+# Development settings
+[env.dev]
+name = "hari-cloud-dev"
+
+# Production settings
+[env.production]
+name = "hari-cloud"

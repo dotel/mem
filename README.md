@@ -1,214 +1,57 @@
-# Hari v1 - Modular Personal Assistant Daemon
+# Hari — Long-Term Memory for LLMs
 
-**Hari** is a local-first, modular, agentic productivity assistant daemon written in C. It focuses on time management (Pomodoro), usage monitoring, and notifications via Telegram, with optional natural language commands via local LLM.
+This project is about **building and comparing different long-term memory options** for LLM applications. It provides storage, retrieval, and RAG-style answering over persisted memories.
 
-## Architecture
+## What’s in scope
 
-Hari follows a modular, event-driven architecture:
+- **Memory backends**: pluggable storage and retrieval (e.g. SQLite + embeddings, others to come).
+- **Embeddings**: semantic search over memory documents.
+- **RAG**: retrieve relevant memories and feed them as context to an LLM for grounded answers.
 
-- **Core Daemon**: Single-threaded event loop with pluggable modules
-- **Module System**: Each module implements a standard interface (init, tick, handle_event, shutdown)
-- **Event Bus**: Modules communicate via typed events
-- **Storage Layer**: Abstracted storage with local JSON backend (remote sync planned)
-- **IPC**: Unix domain socket with JSON protocol for CLI communication
+## Current memory options
 
-## Directory Structure
+| Option | Storage | Retrieval | Notes |
+|--------|--------|-----------|--------|
+| **SQLite + embeddings** | `memory_docs` in SQLite | Cosine similarity over sentence-transformers vectors | Default; uses `sentence-transformers/all-MiniLM-L6-v2`. |
+
+More backends (e.g. dedicated vector DBs, different embedding providers) can be added for comparison.
+
+## Requirements
+
+- Python 3.8+
+- See `requirements.txt` for dependencies (e.g. `fastapi`, `uvicorn`, `sentence-transformers`, `numpy` for full memory/RAG).
+
+Optional: [Ollama](https://ollama.ai/) (or another LLM via `llm_providers`) for RAG generation.
+
+## Setup
+
+```bash
+pip install -r requirements.txt
+```
+
+Copy `config.json.example` to `config.json` and adjust (e.g. LLM provider). Data is stored under `~/.hari/` (SQLite DB and optional config).
+
+## Run
+
+```bash
+python hari.py run
+```
+
+This starts the service (API and in-process components). Default API: `http://127.0.0.1:8765` (set `HARI_API_PORT` to override).
+
+## Project layout
 
 ```
 hari/
-├── daemon/          # Core daemon implementation
-│   ├── main.c
-│   ├── event_loop.c
-│   ├── module_registry.c
-│   └── storage/
-├── modules/         # Pluggable modules
-│   ├── pomodoro/
-│   ├── usage_monitor/
-│   ├── telegram/
-│   └── llm_adapter/
-├── ipc/             # IPC server/client implementation
-├── cli/             # Command-line client
-├── config/          # Configuration management
-└── include/         # Shared headers
+├── hari.py           # Entry point (run)
+├── hari_services.py  # Services: memory layer, LLM, Web API
+├── llm_providers.py # LLM provider abstraction (Ollama, Bedrock, …)
+├── schema.sql       # DB schema (analytics/memory tables)
+├── config.json.example
+├── requirements.txt
+└── frontend/        # Optional Next.js UI (uses the API)
 ```
-
-## Modules
-
-### Pomodoro Module
-- Start, pause, resume, cancel timers
-- Auto-break handling
-- State persistence
-- Events: `EVENT_POMODORO_COMPLETE`, `EVENT_POMODORO_START`, `EVENT_POMODORO_CANCEL`
-
-### Usage Monitor Module
-- Track active window every N seconds
-- App blacklist checking
-- Usage threshold alerts
-- Events: `EVENT_USAGE_THRESHOLD`
-
-### Telegram Module
-- Non-blocking notifications via Telegram Bot API
-- Subscribes to: Pomodoro complete, usage threshold, daily summaries
-
-### LLM Adapter Module
-- Natural language command processing via local LLM (Ollama)
-- Structured command execution (no raw text execution)
-- Events: `EVENT_LLM_COMMAND`
-
-## Building
-
-```bash
-make clean
-make all
-```
-
-This produces:
-- `harid` - The daemon executable
-- `hari` - The CLI client
-
-## Configuration
-
-Configuration is stored in `~/.hari/config.toml` (TOML parsing not yet implemented, using defaults):
-
-```toml
-[pomodoro]
-duration_minutes = 25
-short_break_minutes = 5
-long_break_minutes = 15
-auto_start_breaks = false
-
-[telegram]
-enabled = false
-token = "YOUR_BOT_TOKEN"
-chat_id = "YOUR_CHAT_ID"
-
-[usage_monitor]
-sample_interval_seconds = 5
-threshold_minutes = 120
-blacklist_apps = ["Twitter", "Reddit", "Facebook"]
-
-[llm]
-enabled = false
-model_name = "llama2"
-endpoint = "http://localhost:11434/api/generate"
-```
-
-## Running
-
-Start the daemon:
-```bash
-./harid
-```
-
-### Using Hari (Natural Language Interface)
-
-The primary way to interact with Hari is through natural language commands:
-
-```bash
-./hari start a timer for 30 minutes
-./hari pause my pomodoro
-./hari stop the timer
-./hari what's the status
-```
-
-The `hari` command accepts any natural language input and routes it through the LLM daemon for parsing.
-
-### Using hari-debug (Internal Testing)
-
-For testing core daemon features directly (bypasses LLM):
-
-```bash
-./hari-debug ping                  # Check daemon status
-./hari-debug pomodoro start        # Start a Pomodoro session
-./hari-debug pomodoro stop         # Stop current session
-./hari-debug status                # Get daemon status
-```
-
-The `hari-debug` tool sends structured commands directly to the C daemon and is primarily used for development and debugging.
-
-## State Storage
-
-- `~/.hari/state.json` - Current state snapshot
-- `~/.hari/events.log` - Event history log
-
-## Development Status
-
-**Phase 1 (Current)**: ✅ Skeleton Implementation
-- ✅ Core daemon structure
-- ✅ Module system framework
-- ✅ IPC socket server/client
-- ✅ Basic logging
-- ✅ Configuration framework
-- ✅ Storage abstraction
-
-**Phase 2**: Module Implementation
-- ⏳ Pomodoro timer logic
-- ⏳ Active window detection (X11/Wayland)
-- ⏳ Telegram Bot API integration (libcurl)
-- ⏳ LLM adapter (Ollama integration)
-
-**Phase 3**: Advanced Features
-- ⏳ JSON parsing (config + IPC)
-- ⏳ Daily summaries
-- ⏳ Usage analytics
-- ⏳ Proactive reminders
-
-**Phase 4**: Future Expansion
-- ⏳ Remote sync backend
-- ⏳ GUI (PySide6/Tauri)
-- ⏳ Additional modules
-
-## Module Interface
-
-To create a new module, implement the `hari_module_t` interface:
-
-```c
-typedef struct hari_module {
-    const char* name;
-    const char* version;
-    void* state;
-    
-    int (*init)(void);
-    void (*tick)(uint64_t now_ms);
-    void (*handle_event)(hari_event_t* event);
-    void (*shutdown)(void);
-} hari_module_t;
-```
-
-Register your module in `daemon/main.c`:
-
-```c
-hari_module_t* my_module = my_module_create();
-module_register(my_module);
-```
-
-## Dependencies
-
-Current:
-- POSIX APIs (sockets, signals, time)
-- Standard C library
-
-Future:
-- `libcurl` - HTTP requests (Telegram, LLM)
-- `json-c` or `cJSON` - JSON parsing
-- X11/Wayland libs - Window tracking
 
 ## License
 
 To be determined.
-
-## Contributing
-
-This is a personal project for Hari. Contributions welcome!
-
-## TODO
-
-- [ ] Implement JSON parsing for config and IPC
-- [ ] Add libcurl for HTTP requests
-- [ ] Implement active window detection
-- [ ] Complete Telegram Bot API integration
-- [ ] Add Ollama LLM integration
-- [ ] Improve error handling
-- [ ] Add unit tests
-- [ ] Write systemd service file
-- [ ] Create installation script
